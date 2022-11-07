@@ -11,8 +11,11 @@ Due: November 17, 2022
 ```{r}
 # Required packages
 library(quanteda)
+library(quanteda.textstats)
 library(stm)
 library(matrixStats)
+library(tidyverse)
+library(tidytext)
 ```
 
 # Part 1. Hilary's Emails
@@ -25,12 +28,6 @@ https://www.kaggle.com/kaggle/hillary-clinton-emails.
 We’re going to work with the `Emails.csv` file, which is available in the directory on coursework for this assignment. Run the following code to preprocess the data:
 
 ```{r}
-library(tidyverse)
-library(glmnet)
-library(quanteda)
-library(quanteda.textstats)
-library(tidytext)
-
 # read csv
 clinton <- read.csv("Emails.csv") 
 
