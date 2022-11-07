@@ -6,9 +6,105 @@ output: html_document
 ---
 
 Assigned: November 8, 2022
-Due: November 15, 2022
+Due: November 17, 2022
 
-In this homework assignment, we will analyze political blogs from 2008. We are interested in exploring the themes and topics political commentators address, and the extent to which these themes differ across the liberal-conservative spectrum.
+```{r}
+# Required packages
+library(quanteda)
+library(stm)
+library(matrixStats)
+```
+
+# Part 1. Hilary's Emails
+
+In this section we will begin analyzing a collection of emails Hillary Clinton released as part of her (potentially improper) use of a private email server. 
+
+The dataset that we use comes from Kaggle where a team processed an initial release of 7,946 emails to create an easy to read csv file. The complete download is available here:
+https://www.kaggle.com/kaggle/hillary-clinton-emails.
+
+We’re going to work with the `Emails.csv` file, which is available in the directory on coursework for this assignment. Run the following code to preprocess the data:
+
+```{r}
+library(tidyverse)
+library(glmnet)
+library(quanteda)
+library(quanteda.textstats)
+library(tidytext)
+
+# read csv
+clinton <- read.csv("emails.csv") 
+
+# tokenize
+clinton.toks <- clinton %>% 
+  corpus(text_field = "RawText", docid_field = "Id") %>%
+  tokens(split_hyphens = TRUE,
+         remove_punct = TRUE,
+         remove_numbers = TRUE,
+         remove_symbols = TRUE,
+         remove_url = TRUE) %>%
+  tokens_tolower()  
+
+# make dtm
+clinton.dtm <- clinton.toks %>%
+  tokens_remove(pattern = stopwords("en")) %>%
+  dfm()
+```
+
+## 1. Benghazi
+
+You might recall that there was considerable controversy over Hillary Clinton’s role in an incident in Benghazi where a US ambassador and other foreign service officers were killed. We're going to count the number of times Benghazi is used and how it is used in her emails.
+
+### 1.1 
+
+Count the number of times "Benghazi" is used in each email. Print the ID of the email(s) with the highest frequency.
+
+```{r}
+# YOUR CODE HERE
+```
+
+### 1.2 
+
+Using KWIC, find the 5 words before and after "benghazi" in the emails. Based on your impressions (and not a quantitative analysis, unless you want), when do mentions of Benghazi tend to occur in her email?
+
+```{r}
+# YOUR CODE HERE
+```
+
+## 2. Sentiment
+
+### 2.1
+
+Using the `bing` dictionary from the `tidytext::get_sentiments` function, calculate the positive sentiment (as a proportion of all pos+neg words) for each email. Print the sentiments of the first 5 emails.
+
+```{r}
+# YOUR CODE HERE
+```
+
+### 2.2
+
+Regress the positive sentiment score against the number of times Benghazi is mentioned in an email. What do you notice about the relationship?
+
+```{r}
+# YOUR CODE HERE
+```
+
+### 2.3
+
+Another sentiment dictionary is the 2015 Lexicoder Sentiment Dictionary, which is available in the `data_dictionary_LSD2015` object from quanteda. The dictionary contains both negative/positive as well as "neg_positive" and "neg_negative" phrases 
+
+Read the documentation first! Then, use the dictionary to recalculate the sentiment of the emails. Both "negative" and "neg_positive" frequencies should be counted as "negative, and vice versa for "postive and "neg_negative". 
+
+After you recalculate the positive sentiment score, re-estimate its relationship to "Benghazi" frequency. Did your results change?
+
+```{r}
+# YOUR CODE HERE
+```
+
+# Part 2: Political Blogs
+
+## 3. K-Means Clustering
+
+For the rest of the assignment, we will analyze political blogs from 2008. We are interested in exploring the themes and topics political commentators address, and the extent to which these themes differ across the liberal-conservative spectrum.
 
 The data we'll be working with is available in the `poliblog5k` object from the `stm` package. It includes a 5000 document sample from CMU 2008 Political Blog Corpus (Eisenstein and Xing 2010). Blog posts come from 6 blogs during the U.S. 2008 Presidential Election. It includes the following variables:
 
@@ -18,17 +114,6 @@ The data we'll be working with is available in the `poliblog5k` object from the 
 - `text`: the first 50 characters (rounded to the nearest full word).
 
 Please keep all open-ended responses to, at most, one paragraph.
-
-Run the following code to get started.
-
-```{r}
-# Required packages
-library(quanteda)
-library(stm)
-library(matrixStats)
-```
-
-# 1. K-Means Clustering and Calculating Distance
 
 In this section, you will use the kmeans algorithm to cluster the documents. The code below loads the blogs and conducts the usual pre-processing steps.
 
@@ -57,7 +142,7 @@ dtm <- convert(dtm, to = "data.frame")
 dtm$doc_id <- NULL # remove doc_id column
 ```
 
-## a. 
+### 3.1. 
 
 Normalize the rows of dtm use so that each row sums to 1.
 
@@ -65,7 +150,7 @@ Normalize the rows of dtm use so that each row sums to 1.
 # YOUR CODE HERE
 ```
 
-## b. 
+### 3.2
 
 Assuming that K = 15, apply K-Means to the tweets with the normalized rows. Report the size (i.e., number of observations) in each cluster. Remember to set the seed so that you can reproduce your work!
 
@@ -73,7 +158,7 @@ Assuming that K = 15, apply K-Means to the tweets with the normalized rows. Repo
 # YOUR CODE HERE
 ```
 
-## c. 
+### 3.3
 
 Report the top 10 1) "most frequent" words, and 2) "most distinctive" words in each cluster.
 
@@ -81,7 +166,7 @@ Report the top 10 1) "most frequent" words, and 2) "most distinctive" words in e
 # YOUR CODE HERE
 ```
 
-## d.
+### 3.4
 
 Select one cluster of your choice and read (a sample of) documents from that cluster. Apply a hand label and justify your choice.
 
@@ -89,7 +174,7 @@ Select one cluster of your choice and read (a sample of) documents from that clu
 # YOUR CODE HERE
 ```
 
-# 2. Structural Topic Model
+## 4. Structural Topic Model
 
 In this section you will apply a topic model to the `poliblog5k` corpus using the `stm` package. Recall that `stm` requires our data to be formatted a particular way. So we can't rely on our usual DTM.
 
@@ -106,7 +191,7 @@ vocab <- poliblog5k.voc
 meta <- poliblog5k.meta
 ```
 
-## a. 
+### 4.1 
 
 Using the `stm` function, create a topic model where the prevalence of topics depend on the blog's party affiliation. Set the following options:
 
@@ -121,7 +206,7 @@ We *highly recommend* you read the help file for the `stm` function before attem
 # YOUR CODE HERE
 ```
 
-## b. 
+### 4.2
 
 Using `labelTopics` and the other output from `stm`, assign a hand label to each topic and save these in an object called `labels`.
 
@@ -133,7 +218,7 @@ Then report the prevalence of the topic across the documents.
 # labels <- c() # FILL ME OUT
 ```
 
-## c.
+### 4.3
 
 Using `estimateEffect` and `plot.estimateEffect` compare how Republicans and Democrats differ in their attention to the topics. On what topics are they most distinct? On what topics are they most similar? 
 
