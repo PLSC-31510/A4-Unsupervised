@@ -153,6 +153,10 @@ Assuming that K = 15, apply K-Means to the tweets with the normalized rows. Repo
 
 ```{r}
 # YOUR CODE HERE
+
+# Set the seed
+set.seed(123)
+
 ```
 
 ### 3.3
@@ -196,6 +200,7 @@ Using the `stm` function, create a topic model where the prevalence of topics de
 - `init.type = "Spectral"` (a method of initialization that doesn't involve random chance)
 - `prevalence = ~rating` (to examine the prevalence of each topic based on blog's partisanship)
 - `max.em.its = 15` (allow to algorithm to iterate a maximum of 15 times. This will cut down on run time, although it will provide rough cuts of topics.)
+- `seed = 123` (specifies the random number that that algorithm starts from so that the result is reproducible)
 
 We *highly recommend* you read the help file for the `stm` function before attempting this!
 
